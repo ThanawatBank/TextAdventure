@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Adventure Game</title>
+</head>
+<body>
+    <pre id="gameText"></pre>
+    <input type="text" id="userInput" autofocus>
+    <script>
+        class Game {
+            constructor() {
+                this.inventory = [];
+                this.output = document.getElementById("gameText");
+                this.input = document.getElementById("userInput");
+                this.input.addEventListener("keypress", (event) => {
+                    if (event.key === "Enter") {
+                        this.handleInput();
+                    }
+                });
+                this.startGame();
+            }
+
+            print(text) {
+                this.output.innerHTML += text + "\n";
+            }
+
+            startGame() {
+                this.inventory = [];
+                this.output.innerHTML = "";
+                this.print("คุณตื่นขึ้นมาในเขาวงกตที่มืดมิด รู้สึกถึงอากาศเย็นที่ปะทะผิวหนัง และเสียงลมพัดเบาๆ ผ่านช่องแคบของกำแพงหิน...");
+                this.print("พิมพ์ 'inventory' เพื่อตรวจสอบไอเทม หรือ 'restart' เพื่อเริ่มใหม่");
+                this.scene1();
+            }
+
+            handleInput() {
+                const userInput = this.input.value.trim().toLowerCase();
+                this.input.value = ""; // Clear the input field
+                if (userInput === "inventory") {
+                    this.print("คุณมี: " + this.inventory.join(", "));
+                } else if (userInput === "restart") {
+                    this.startGame();
+                } else if (this.currentCallback) {
+                    this.currentCallback(userInput);
+                }
+            }
+
+            scene1() {
+                this.print("\nคุณพบกล่องไม้เก่าแก่ คุณต้องการเปิดมันไหม? (yes/no)");
+                this.waitForInput((answer) => {
+                    if (answer === "yes") {
+                        this.print("คุณพบไฟฉายเก่า มีดที่ถูกขัดเกลาอย่างพิถีพิถัน และเชือกที่ทอจากเส้นใยบางๆ...");
+                        this.inventory.push("flashlight", "knife", "rope");
+                    } else {
+                        this.print("คุณเดินผ่านไป...");
+                    }
+                    this.scene2();
+                });
+            }
+
+            scene2() {
+                this.print("\nคุณพบแมงมุมยักษ์! คุณจะสู้หรือหนี? (fight/run)");
+                this.waitForInput((answer) => {
+                    if (answer === "fight") {
+                        this.print("เลือกไอเทมที่ใช้ต่อสู้: (flashlight/knife/hands)");
+                        this.waitForInput((item) => {
+                            if (item === "flashlight" && this.inventory.includes("flashlight")) {
+                                this.print("แสงจ้าทำให้แมงมุมหนีไป!");
+                                this.scene3();
+                            } else if (item === "knife" && this.inventory.includes("knife")) {
+                                this.print("คุณจัดการแมงมุมได้!");
+                                this.scene3();
+                            } else {
+                                this.print("คุณแพ้! พิมพ์ 'restart' เพื่อเริ่มใหม่");
+                            }
+                        });
+                    } else if (answer === "run") {
+                        this.print("คุณหนีสำเร็จ!");
+                        this.scene3();
+                    }
+                });
+            }
+
+            scene3() {
+                this.print("\nบนกำแพงที่ถูกปกคลุมด้วยตะไคร่น้ำ คุณเห็นสัญลักษณ์ลึกลับที่สลักอยู่...");
+                this.print("มันเหมือนจะขยับได้เมื่อคุณมองไปที่มัน มีเสียงดังเล็กๆ และคำถามดังขึ้นในใจของคุณ: 'ยามเช้าเดิน 4 ขา ยามเที่ยงวันเดิน 2 ขา และยามบ่ายเดิน 3 ขา ข้าคือสิ่งใด?'");
+                this.waitForInput((answer) => {
+                    if (answer === "human") {
+                        this.print("คุณได้รับกุญแจ และประตูเปิดออกไปสู่ทางที่ปลอดภัย");
+                        this.inventory.push("key");  // เพิ่มกุญแจหลังจากไขปริศนา
+                        this.scene4();
+                    } else {
+                        this.print("รหัสไม่ถูกต้อง! คุณต้องลองใหม่");
+                        this.scene3();
+                    }
+                });
+            }
+
+            scene4() {
+                this.print("\nคุณเดินต่อไปพบกับทางแยกที่มืดมิด มีทางเลือกหนึ่งที่สว่างจ้าและอีกทางมืดทึบ...");
+                this.print("คุณต้องเลือกทางที่มีแสงสว่างหรือจะไปทางที่มืดและน่าสงสัย? (light/dark)");
+                this.waitForInput((answer) => {
+                    if (answer === "light") {
+                        this.print("คุณเดินไปตามทางสว่างและพบบันไดไม้เก่า...");
+                        this.scene5();
+                    } else if (answer === "dark") {
+                        this.print("คุณเดินไปตามทางมืดและตกลงไปในหลุม!");
+                        this.print("พิมพ์ 'restart' เพื่อเริ่มใหม่");
+                    }
+                });
+            }
+
+            scene5() {
+                this.print("\nคุณพบบันไดเก่าๆ ที่ทำจากไม้ มันดูไม่มั่นคงนัก แต่คุณต้องเลือกว่าจะปีนขึ้นไปหรือจะใช้เชือกที่คุณพบก่อนหน้านี้... (ladder/rope)");
+                this.waitForInput((answer) => {
+                    if (answer === "ladder") {
+                        this.print("คุณปีนบันไดขึ้นไปและพบห้องลับ...");
+                        this.scene6();
+                    } else if (answer === "rope" && this.inventory.includes("rope")) {
+                        this.print("คุณใช้เชือกไต่ลงไป...");
+                        this.scene6();
+                    } else {
+                        this.print("คุณไม่มีเชือก! พิมพ์ 'restart' เพื่อเริ่มใหม่");
+                    }
+                });
+            }
+
+            scene6() {
+                this.print("\nคุณพบประตูเก่าที่ล็อกอยู่ ข้างๆ มันมีคำใบ้: 'อะไรที่ไม่เคยหยุดและไม่มีวันหยุดได้?'");
+                this.waitForInput((answer) => {
+                    if (answer === "time") {
+                        this.print("ประตูเปิดออก!");
+                        this.scene7();
+                    } else {
+                        this.print("ลองอีกครั้ง!");
+                        this.scene6();
+                    }
+                });
+            }
+
+            scene7() {
+                this.print("\nคุณพบเครื่องจักรโบราณที่มีลักษณะคล้ายกับประตูพิเศษ มันดูเหมือนจะมีความลับบางอย่างซ่อนอยู่...");
+                this.print("เสียงกรอบแกรบของมันทำให้คุณตระหนักว่าอาจมีสิ่งที่อยู่ข้างในรอให้คุณค้นพบ (yes/no)");
+                this.waitForInput((answer) => {
+                    if (answer === "yes") {
+                        this.print("เครื่องจักรทำงานและประตูเปิดออก!");
+                        this.scene8();
+                    } else {
+                        this.print("คุณเลือกหาทางอื่น...");
+                        this.scene6();
+                    }
+                });
+            }
+
+            scene8() {
+                this.print("\nคุณเดินต่อไปจนถึงห้องใหญ่ที่เต็มไปด้วยเงามืด และมอนสเตอร์ยักษ์ยืนอยู่ตรงหน้า...");
+                this.print("มันเป็นสิ่งมีชีวิตที่น่ากลัว มีปีกที่แข็งแกร่งและกรงเล็บ ที่สามารถฉีกทึ้งได้ทุกอย่างที่อยู่ตรงหน้า (fight/run)");
+                this.waitForInput((answer) => {
+                    if (answer === "fight") {
+                        this.print("เลือกไอเทมที่ใช้สู้: (flashlight/knife)");
+                        this.waitForInput((item) => {
+                            if (item === "flashlight" && this.inventory.includes("flashlight")) {
+                                this.print("คุณใช้ไฟฉาย! มอนสเตอร์หนีไป!");
+                                this.scene9();
+                            } else if (item === "knife" && this.inventory.includes("knife")) {
+                                this.print("คุณใช้มีดฟันมอนสเตอร์จนพ่ายแพ้!");
+                                this.scene9();
+                            } else {
+                                this.print("คุณไม่มีไอเทมนี้! พิมพ์ 'restart' เพื่อเริ่มใหม่");
+                            }
+                        });
+                    } else {
+                        this.print("คุณหนีไปได้...");
+                        this.scene9();
+                    }
+                });
+            }
+
+            scene9() {
+                this.print("\nคุณพบประตูที่ล็อกอยู่ จะใช้กุญแจไหม? (yes/no)");
+                this.waitForInput((answer) => {
+                    if (answer === "yes" && this.inventory.includes("key")) {
+                        this.print("คุณใช้กุญแจไขประตูและพบทางออก!");
+                        this.scene10();
+                    } else {
+                        this.print("คุณไม่มีกุญแจ! ต้องหาก่อน พิมพ์ 'restart' เพื่อเริ่มใหม่");
+                    }
+                });
+            }
+
+            scene10() {
+                this.print("\nคุณเปิดประตูและพบทางออก! คุณชนะ!");
+            }
+
+            waitForInput(callback) {
+                this.currentCallback = callback;
+            }
+        }
+
+        let game = new Game();
+    </script>
+</body>
+</html>
